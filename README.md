@@ -11,13 +11,13 @@ Student name with SID:
 1. Fung Wing Kei (13874134)
 2. C
 3. K
-4. C
+4. Chen Si Wei (13772098)
 
 Workload division:
 1. Fung Wing Kei (13874134) - 
 2. C
 3. K
-4. C
+4. Chen Si Wei (13772098)
 
 **Project file intro:**
 server.js:
