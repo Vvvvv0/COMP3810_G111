@@ -3,8 +3,11 @@
 Personal Expense and Budget Tracker: 
 
 **Group info:**
+
 Group no. 111 
+
 Student name with SID:
+
 1. Fung Wing Kei (13874134)
 2. C
 3. K
