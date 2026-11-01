@@ -13,10 +13,12 @@ Workload division:
 2. C
 3. K
 4. C
+
 **Project file intro:**
 server.js:
 package.json:
 public:
 views:
 models:
+
 **Operational guides:**
