@@ -30,7 +30,7 @@ app.use(session({
 
 // ===== HOMEPAGE =====
 app.get('/', (req, res) => {
-  res.send('<h1>Personal Expense and Budget Tracker</h1>);
+  res.send('<h1>Personal Expense and Budget Tracker</h1>');
 });
 
 // ===== START =====
