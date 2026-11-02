@@ -6,9 +6,9 @@
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Group 111",
   "license": "ISC",
-  "description": "",
+  "description": "Personal Expense and Budget Tracker",
   "dependencies": {
     "ejs": "^7.0.2",
     "express": "^5.3.0",
