@@ -5,7 +5,7 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI ||
-  'mongodb+srv://v7471750_db_user:demo_user123@cluster0.m7gufge.mongodb.net/';
+  'mongodb+srv://Venus:Fung2006@cluster0.p7mch1n.mongodb.net/';
 
 // ===== SHARED SETUP (Member 1) =====
 app.use(express.urlencoded({ extended: true }));
