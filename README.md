@@ -9,13 +9,13 @@ Group no. 111
 Student name with SID:
 
 1. Fung Wing Kei (13874134)
-2. C
+2. Chung Ka Ki (13875708)
 3. K
 4. Chen Si Wei (13772098)
 
 Workload division:
 1. Fung Wing Kei (13874134) - 
-2. C
+2. Chung Ka Ki (13875708)
 3. K
 4. Chen Si Wei (13772098)
 
