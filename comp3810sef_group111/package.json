@@ -1,18 +1,20 @@
 {
-  "name": "comp3810sef_group111",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "comp3810sef-group111",
+  "description": "COMP3810SEF Autumn 2026 Group Project - Budget App",
+  "author": "Group 111 (add member names and SIDs in README.md)",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "cookie-session": "^2.1.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "mongodb": "6.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node server.js"
-  },
-  "keywords": [],
-  "author": "Group 111",
-  "license": "ISC",
-  "description": "Personal Expense and Budget Tracker",
-  "dependencies": {
-    "ejs": "^7.0.2",
-    "express": "^5.3.0",
-    "express-session": "^1.19.0",
-    "mongoose": "^9.11.4"
   }
 }
+

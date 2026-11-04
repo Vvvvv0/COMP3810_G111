@@ -1,15 +1,19 @@
-const mongoose = require('mongoose');
+// models/transaction.js  [Member 3]  shared Transaction model
+// Fields: userId (string), type ('income' or 'expense'), amount (> 0), category, date (Date), note, createdAt
+const { ObjectId } = require('mongodb');
+const COLLECTION = 'transactions';
 
-const transactionSchema = new mongoose.Schema({
-  userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  type:      { type: String, enum: ['income', 'expense'], required: true },
-  amount:    { type: Number, required: true, min: 0.01 },
-  category:  { type: String, required: true,
-               enum: ['food', 'transport', 'shopping', 'housing', 'entertainment',
-                      'health', 'education', 'other', 'salary', 'bonus', 'investment'] },
-  date:      { type: Date, required: true },
-  note:      { type: String, default: '', maxlength: 200 },
-  createdAt: { type: Date, default: Date.now }
-});
+// Returns an error message, or null if the record is valid
+const validateTransaction = (t) => {
+  if (t.type !== 'income' && t.type !== 'expense') return 'type must be income or expense';
+  if (!(Number(t.amount) > 0)) return 'amount must be greater than 0';
+  if (!t.category) return 'category is required';
+  return null;
+};
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+const findTransactions = (db, filter) => db.collection(COLLECTION).find(filter).toArray();
+const insertTransaction = (db, doc) => db.collection(COLLECTION).insertOne({ ...doc, createdAt: new Date() });
+const updateTransaction = (db, filter, changes) => db.collection(COLLECTION).updateOne(filter, { $set: changes });
+const deleteTransaction = (db, filter) => db.collection(COLLECTION).deleteOne(filter);
+
+module.exports = { ObjectId, validateTransaction, findTransactions, insertTransaction, updateTransaction, deleteTransaction };

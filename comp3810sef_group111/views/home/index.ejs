@@ -1,0 +1,27 @@
+<HTML>
+<HEAD>
+  <TITLE><%= title %></TITLE>
+  <link rel="stylesheet" href="/css/style.css">
+</HEAD>
+<BODY>
+<header>
+  <a href="/" class="brand">Budget App</a>
+  <nav>
+    <% if (user && user.authenticated) { %>
+      <a href="/transactions">Transactions</a>
+      <a href="/budgets">Budgets</a>
+      <a href="/goals">Goals</a>
+      <a href="/profile">Profile</a>
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </nav>
+</header>
+<main>
+  <H1>Personal Expense and Budget Tracker</H1>
+  <p>Group 111. Shared page, content to follow.</p>
+</main>
+</BODY>
+</HTML>

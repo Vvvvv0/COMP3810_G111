@@ -1,9 +1,10 @@
-const mongoose = require('mongoose');
+// models/user.js [Member 2] shared User model
+// Fields: username (unique), email (unique), password, displayName, createdAt
+const COLLECTION = 'users';
 
-const userSchema = new mongoose.Schema({
-  username:    { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password:    { type: String, required: true },
-  createdAt:   { type: Date, default: Date.now }
-});
+const findUser = (db, filter) => db.collection(COLLECTION).findOne(filter);
 
-module.exports = mongoose.model('User', userSchema);
+const insertUser = (db, doc) =>
+  db.collection(COLLECTION).insertOne({ ...doc, createdAt: new Date() });
+
+module.exports = { findUser, insertUser };
