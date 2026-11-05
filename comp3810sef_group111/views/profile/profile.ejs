@@ -1,0 +1,30 @@
+<%- include('../home/index') %>
+<div class = "container">
+    <form action="/profile" method="POST">
+        <h3>My Profile</h3>
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="<%= profile.username %>" readonly>    
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="<%= profile.email %>" readonly>
+        </div>
+        <h3>Change Password</h3>
+        <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" name="currentPassword" required>
+        </div>
+        <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" name="newPassword" required>
+        </div>
+        <div class="form-group">
+            <label for="confirmNewPassword">Confirm New Password</label>
+            <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+        </div>
+        <button type="submit">Update Profile</button>
+    </form>
+
+</div>
+<%- include('../home/footer') %>

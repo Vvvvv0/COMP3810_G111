@@ -6,3 +6,23 @@ main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
 table { width: 100%; border-collapse: collapse; background: #fff; }
 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
 th { background: #edf2f7; }
+.form-container { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+                  max-width: 380px; margin: 24px auto; padding: 24px; }
+.form-container h2 { margin-top: 0; }
+.form-container h3 { font-size: 1em; margin: 20px 0 10px;
+                     padding-top: 14px; border-top: 1px solid #eee; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; margin-bottom: 4px; font-weight: 600; }
+.form-group input { width: 100%; padding: 8px; box-sizing: border-box;
+                    border: 1px solid #cbd5e0; border-radius: 4px; font: inherit; }
+.form-group input:disabled { background: #edf2f7; color: #666; }
+.form-container button { width: 100%; padding: 10px; background: #2c5282; color: #fff;
+                         border: 0; border-radius: 4px; font: inherit; cursor: pointer; }
+.form-container button:hover { background: #24506f; }
+.hint { color: #555; font-size: 0.85em; }
+.error { background: #fde8e8; border: 1px solid #f5b5b5; color: #9b1c1c;
+         border-radius: 4px; padding: 8px 8px 8px 26px; margin-bottom: 14px; }
+.error ul { margin: 0; padding-left: 4px; }
+.success { background: #e6ffed; border: 1px solid #a8e0b5; color: #1b6b34;
+           border-radius: 4px; padding: 8px; margin-bottom: 14px; }
+.form-footer { text-align: center; font-size: 0.9em; }

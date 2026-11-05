@@ -10,6 +10,55 @@ const dbName = 'COMP3810sef';
 const SECRETKEY = 'comp3810-group111-secret';
 const client = new MongoClient(uri);
 
+// Set password errors for such rules:
+// 1. >= 8 characters
+// 2. At least one uppercase letter
+// 3. At least one lowercase letter
+// 4. Password must contain at least one number
+// 5. Password must contain only letters and numbers
+// 6. Password must not contain the username
+// 7. Passwords must match
+
+
+function passwordError(password,confirmPassword,username) {
+  const errors = [];
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  if (!/[^A-Za-z0-9\s]/.test(password)) {
+    errors.push('Password must contain at least one special character');
+  }
+  if (password.toLowerCase().includes(username.toLowerCase())) {
+    errors.push('Password must not contain the username');
+  }
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match');
+  }
+  
+  return errors;
+}
+
+function validateEmail(email) {
+  if (!email) return 'Email is required';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return 'Invalid email format.Vaild email format: user@example.com';
+  }
+  return null;
+}
+
+app.locals.passwordError = passwordError;
+app.locals.validateEmail = validateEmail;
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.json());
