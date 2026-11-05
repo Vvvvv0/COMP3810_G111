@@ -10,13 +10,13 @@ Student name with SID:
 
 1. Fung Wing Kei (13874134)
 2. Chung Ka Ki (13875708)
-3. K
+3. Chau Wai Ming (13874632)
 4. Chen Si Wei (13772098)
 
 Workload division:
 1. Fung Wing Kei (13874134) - 
 2. Chung Ka Ki (13875708)
-3. K
+3. Chau Wai Ming (13874632)
 4. Chen Si Wei (13772098)
 
 **Project file intro:**
