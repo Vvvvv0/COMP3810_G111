@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget List</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>My Budget</h1>
+
+    <!-- 月份筛选 -->
+    <div class="month-filter">
+        <label>Select Month：</label>
+        <input type="month" id="monthSelect">
+        <button id="filterBtn">Filter</button>
+    </div>
+
+    <!-- 新增预算按钮 -->
+    <a href=" ">
+        <button>Add New Budget</button>
+    </a >
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Budget Amount</th>
+                <th>Spent</th>
+                <th>Remaining</th>
+                <th>Usage %</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 静态样例，后续后端写好替换成循环渲染 -->
+            <tr>
+                <td>Food</td>
+                <td>2000</td>
+                <td>1200</td>
+                <td>800</td>
+                <td>60%</td>
+                <td>
+                    <a href="/budgets/edit/1">Edit</a >
+                    <button>Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <a href="/">Back to Homepage</a >
+</body>
+</html>
