@@ -7,4 +7,6 @@ const findUser = (db, filter) => db.collection(COLLECTION).findOne(filter);
 const insertUser = (db, doc) =>
   db.collection(COLLECTION).insertOne({ ...doc, createdAt: new Date() });
 
-module.exports = { findUser, insertUser };
+const updateUser = (db, filter, update) =>
+  db.collection(COLLECTION).updateOne(filter, { $set: update });
+module.exports = { findUser, insertUser, updateUser };
