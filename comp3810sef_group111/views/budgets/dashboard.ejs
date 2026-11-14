@@ -1,0 +1,19 @@
+<%- include('../home/index') %>
+<div class="form-container">
+  <h2>Budget Dashboard — <%= month %></h2>
+  <a href="/budgets?month=<%= month %>">Back to budgets</a>
+
+  <% budgets.forEach(function (bg) { %>
+  <div class="form-group">
+    <strong><%= bg.category || 'Overall' %></strong>
+    <p>
+      Budget: <%= bg.amount %> &middot; Spent: <%= bg.spentAmount %> &middot;
+      Remaining: <%= bg.remaining %> &middot; Usage: <%= bg.usagePct %>%
+    </p>
+    <% if (bg.warning) { %>
+    <div class="error">Warning: you have reached at least 80% of this budget.</div>
+    <% } %>
+  </div>
+  <% }); %>
+</div>
+<%- include('../home/footer') %>
