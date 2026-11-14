@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">Budget App</a>
+  <nav>
+    <a href="/transactions">Transactions</a>
+    <a href="/budgets">Budgets</a>
+    <a href="/goals">Goals</a>
+    <a href="/profile">Profile</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+<main>
+  <div class="form-container">
+    <h2>Edit Transaction</h2>
+
+    <% if (errors && errors.length) { %>
+      <div class="error"><ul>
+        <% errors.forEach(function (e) { %><li><%= e %></li><% }); %>
+      </ul></div>
+    <% } %>
+
+    <form method="POST" action="/transactions/<%= values._id %>">
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type">
+          <option value="expense" <%= values.type === 'expense' ? 'selected' : '' %>>Expense</option>
+          <option value="income" <%= values.type === 'income' ? 'selected' : '' %>>Income</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">
+          <% categories.forEach(function (c) { %>
+            <option value="<%= c %>" <%= values.category === c ? 'selected' : '' %>><%= c %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount</label>
+        <input type="number" step="0.01" min="0.01" name="amount" value="<%= values.amount %>" required>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" name="date" value="<%= values.date %>" required>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <input type="text" name="note" value="<%= values.note || '' %>">
+      </div>
+      <button type="submit">Save</button>
+    </form>
+    <p class="form-footer"><a href="/transactions">Back to list</a></p>
+  </div>
+</main>
+</body>
+</html>
