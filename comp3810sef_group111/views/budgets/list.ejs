@@ -1,54 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget List</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <h1>My Budget</h1>
+<%- include('../home/index') %>
+<div class="form-container">
+  <h2>Budgets</h2>
 
-    <!-- 月份筛选 -->
-    <div class="month-filter">
-        <label>Select Month：</label>
-        <input type="month" id="monthSelect">
-        <button id="filterBtn">Filter</button>
-    </div>
+  <form method="GET" action="/budgets" class="form-group">
+    <label for="month">Month</label>
+    <input type="month" id="month" name="month" value="<%= month %>">
+    <button type="submit">Filter</button>
+    <a href="/budgets/new">+ Add Budget</a>
+    <a href="/budgets/dashboard?month=<%= month %>">Dashboard</a>
+  </form>
 
-    <!-- 新增预算按钮 -->
-    <a href=" ">
-        <button>Add New Budget</button>
-    </a >
+  <% if (error) { %>
+  <div class="error"><%= error %></div>
+  <% } %>
 
-    <table border="1" cellpadding="8" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Category</th>
-                <th>Budget Amount</th>
-                <th>Spent</th>
-                <th>Remaining</th>
-                <th>Usage %</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 静态样例，后续后端写好替换成循环渲染 -->
-            <tr>
-                <td>Food</td>
-                <td>2000</td>
-                <td>1200</td>
-                <td>800</td>
-                <td>60%</td>
-                <td>
-                    <a href="/budgets/edit/1">Edit</a >
-                    <button>Delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <br>
-    <a href="/">Back to Homepage</a >
-</body>
-</html>
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Budget</th>
+        <th>Spent</th>
+        <th>Remaining</th>
+        <th>Usage</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% budgets.forEach(function (bg) { %>
+      <tr>
+        <td><%= bg.category || 'Overall' %></td>
+        <td><%= bg.amount %></td>
+        <td><%= bg.spentAmount %></td>
+        <td><%= bg.remaining %></td>
+        <td>
+          <%= bg.usagePct %>%
+          <% if (bg.warning) { %><span class="error"> (80%+)</span><% } %>
+        </td>
+        <td>
+          <a href="/budgets/<%= bg._id %>/edit">Edit</a>
+          <form method="POST" action="/budgets/<%= bg._id %>/delete" style="display:inline">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<%- include('../home/footer') %>
