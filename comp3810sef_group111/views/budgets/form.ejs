@@ -1,31 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= budget ? "Edit Budget" : "Add New Budget" %></title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body>
-    <h1><%= budget ? "Edit Budget" : "Create New Budget" %></h1>
+<%- include('../home/index') %>
+<div class="form-container">
+  <h2><%= editing ? 'Edit Budget' : 'Add Budget' %></h2>
 
-    <form method="POST">
-        <label>Category:</label>
-        <input type="text" name="category" value="<%= budget ? budget.category : '' %>" required>
-        <br><br>
+  <% if (errors) { %>
+  <div class="error"><%= errors %></div>
+  <% } %>
 
-        <label>Budget Amount:</label>
-        <input type="number" step="0.01" name="amount" value="<%= budget ? budget.amount : '' %>" required>
-        <br><br>
+  <form
+    method="POST"
+    action="<%= editing ? `/budgets/${values._id}/update` : '/budgets' %>"
+  >
+    <div class="form-group">
+      <label for="month">Month</label>
+      <input type="month" id="month" name="month" value="<%= values.month %>" required>
+    </div>
 
-        <label>Month:</label>
-        <input type="month" name="month" value="<%= budget ? budget.month : '' %>" required>
-        <br><br>
+    <div class="form-group">
+      <label for="category">Category (leave blank for overall budget)</label>
+      <input
+        type="text"
+        id="category"
+        name="category"
+        value="<%= values.category || '' %>"
+        placeholder="e.g. Food, Transport"
+      >
+    </div>
 
-        <button type="submit">Save</button>
-    </form>
+    <div class="form-group">
+      <label for="amount">Budget amount</label>
+      <input
+        type="number"
+        id="amount"
+        name="amount"
+        step="0.01"
+        min="0.01"
+        value="<%= values.amount %>"
+        required
+      >
+    </div>
 
-    <br>
-    <a href=" ">← Back to Budget List</a >
-</body>
-</html>
+    <button type="submit"><%= editing ? 'Save Changes' : 'Create Budget' %></button>
+    <a href="/budgets">Cancel</a>
+  </form>
+</div>
+<%- include('../home/footer') %>
