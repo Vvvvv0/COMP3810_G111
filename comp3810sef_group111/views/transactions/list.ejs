@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">Budget App</a>
+  <nav>
+    <a href="/transactions">Transactions</a>
+    <a href="/budgets">Budgets</a>
+    <a href="/goals">Goals</a>
+    <a href="/profile">Profile</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+<main>
+  <h1>My Transactions</h1>
+
+  <% if (success) { %>
+    <div class="success">Transaction <%= success %> successfully.</div>
+  <% } %>
+
+  <p>
+    <strong>Income:</strong> <%= summary.income %> |
+    <strong>Expense:</strong> <%= summary.expense %> |
+    <strong>Net:</strong> <%= summary.net %>
+  </p>
+
+  <div class="form-container" style="max-width:100%;">
+    <form method="GET" action="/transactions">
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type">
+          <option value="">All</option>
+          <option value="income" <%= filter.type === 'income' ? 'selected' : '' %>>Income</option>
+          <option value="expense" <%= filter.type === 'expense' ? 'selected' : '' %>>Expense</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category">
+          <option value="">All</option>
+          <% categories.forEach(function (c) { %>
+            <option value="<%= c %>" <%= filter.category === c ? 'selected' : '' %>><%= c %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>From</label>
+        <input type="date" name="from" value="<%= filter.from || '' %>">
+      </div>
+      <div class="form-group">
+        <label>To</label>
+        <input type="date" name="to" value="<%= filter.to || '' %>">
+      </div>
+      <div class="form-group">
+        <label>Keyword (note)</label>
+        <input type="text" name="keyword" value="<%= filter.keyword || '' %>">
+      </div>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <p><a href="/transactions/new">+ New Transaction</a></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Note</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (transactions.length === 0) { %>
+        <tr><td colspan="6">No transactions found.</td></tr>
+      <% } %>
+      <% transactions.forEach(function (t) { %>
+        <tr>
+          <td><%= new Date(t.date).toISOString().slice(0, 10) %></td>
+          <td><%= t.type %></td>
+          <td><%= t.category %></td>
+          <td><%= t.amount %></td>
+          <td><%= t.note || '' %></td>
+          <td>
+            <a href="/transactions/<%= t._id %>/edit">Edit</a>
+            <form method="POST" action="/transactions/<%= t._id %>/delete" style="display:inline;"
+                  onsubmit="return confirm('Delete this transaction?');">
+              <button type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>
