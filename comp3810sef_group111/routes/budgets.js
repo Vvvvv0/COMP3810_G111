@@ -118,7 +118,7 @@ pages.get('/:id/edit', async (req, res) => {
   });
 });
 
-// Update budget
+//Update budget
 pages.post('/:id/update', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).send('404 Not Found');
   const userId = req.session.userId;
