@@ -1,0 +1,107 @@
+<%- include('../home/index') %>
+<%
+  // ---- Work out progress for every goal. ----
+  // If the route already did this (it adds statusLabel), we use its numbers.
+  var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+  var now = new Date();
+  var today = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+
+  var rows = (locals.goals || []).map(function (g) {
+    if (g.statusLabel) { return g; }
+    var target = Number(g.targetAmount) || 0;
+    var saved = Number(g.savedAmount) || 0;
+    var label = "In progress";
+    if (target > 0 && saved >= target) { label = "Completed"; }
+    else if (g.deadline && g.deadline < today) { label = "Overdue"; }
+    return Object.assign({}, g, {
+      targetAmount: target,
+      savedAmount: saved,
+      percent: target > 0 ? Math.min(100, Math.floor(saved / target * 100)) : 0,
+      remaining: Math.max(0, Math.round((target - saved) * 100) / 100),
+      statusLabel: label
+    });
+  });
+
+  // ---- Totals for the four cards at the top ----
+  var totalSaved = 0, totalTarget = 0, completed = 0;
+  rows.forEach(function (r) {
+    totalSaved += r.savedAmount;
+    totalTarget += r.targetAmount;
+    if (r.statusLabel === "Completed") { completed++; }
+  });
+  totalSaved = Math.round(totalSaved * 100) / 100;
+  totalTarget = Math.round(totalTarget * 100) / 100;
+
+  var message = locals.message || "";
+  var errors = locals.errors || [];
+%>
+<main>
+  <h2>My Saving Goals</h2>
+
+  <% if (message) { %>
+    <div class="success"><%= message %></div>
+  <% } %>
+  <% if (errors.length > 0) { %>
+    <div class="error">
+      <ul>
+      <% errors.forEach(function (m) { %>
+        <li><%= m %></li>
+      <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <div class="goal-summary">
+    <div><strong><%= rows.length %></strong><span>Goals</span></div>
+    <div><strong><%= completed %></strong><span>Completed</span></div>
+    <div><strong><%= totalSaved.toFixed(2) %></strong><span>Total saved</span></div>
+    <div><strong><%= totalTarget.toFixed(2) %></strong><span>Total target</span></div>
+  </div>
+
+  <p><a class="btn" href="/goals/new">+ Add goal</a></p>
+
+  <% if (rows.length === 0) { %>
+    <p class="hint">No saving goals yet. Click "Add goal" to create your first one.</p>
+  <% } else { %>
+  <table>
+    <tr>
+      <th>Goal</th>
+      <th>Progress</th>
+      <th>Deadline</th>
+      <th>Status</th>
+      <th>Add savings</th>
+      <th>Actions</th>
+    </tr>
+    <% rows.forEach(function (g) {
+         var cls = g.statusLabel.toLowerCase().replace(" ", "-"); %>
+    <tr>
+      <td><%= g.name %></td>
+      <td>
+        <div class="bar"><div class="bar-fill <%= cls %>" style="width: <%= g.percent %>%"></div></div>
+        <%= g.savedAmount.toFixed(2) %> / <%= g.targetAmount.toFixed(2) %> (<%= g.percent %>%)<br>
+        <span class="hint">Remaining: <%= g.remaining.toFixed(2) %></span>
+      </td>
+      <td><%= g.deadline ? g.deadline : "-" %></td>
+      <td><span class="badge <%= cls %>"><%= g.statusLabel %></span></td>
+      <td>
+        <% if (g.statusLabel !== "Completed") { %>
+        <form action="/goals/<%= g._id %>/save" method="POST" class="inline-form">
+          <input type="number" name="amount" min="0.01" step="0.01" placeholder="Amount" required>
+          <button type="submit">Add</button>
+        </form>
+        <% } else { %>-<% } %>
+      </td>
+      <td>
+        <a href="/goals/<%= g._id %>/edit">Edit</a>
+        <form action="/goals/<%= g._id %>/delete" method="POST" class="inline-form"
+              onsubmit="return confirm('Delete this goal?');">
+          <button type="submit" class="danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }); %>
+  </table>
+  <% } %>
+</main>
+<%- include('../home/footer') %>
+

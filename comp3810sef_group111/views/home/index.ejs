@@ -1,0 +1,21 @@
+<HTML>
+<HEAD>
+  <TITLE><%= title %></TITLE>
+  <link rel="stylesheet" href="/public/style.css">
+</HEAD>
+<BODY>
+<header>
+  <a href="/" class="brand">Budget App</a>
+  <nav>
+    <% if (user && user.userId) { %>
+      <a href="/transactions">Transactions</a>
+      <a href="/budgets">Budgets</a>
+      <a href="/goals">Goals</a>
+      <a href="/profile">Profile</a>
+      <a href="/logout">Logout</a>
+    <% } else { %>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    <% } %>
+  </nav>
+</header>
