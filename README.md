@@ -34,7 +34,7 @@ command:
 2. npm start
 
 **Demo curl command**
-commands:
+goal commands:
 
 curl -X POST -H "Content-Type: application/json" --data '{"userId":"6af3e71e4f0c6dd87dcd2f94","name":"Japan Trip","targetAmount":1000,"deadline":"2027-03-31"}' localhost:8099/api/goals
 
