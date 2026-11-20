@@ -141,10 +141,10 @@ The top bar shows the links **Transactions, Budgets, Goals, Profile, Logout** af
 
 | Function | Button or UI |
 |---|---|
-| **Create** | *(button / page name)* |
-| **Read** | *(budget list, dashboard)* |
-| **Update** | *(button / page name)* |
-| **Delete** | *(button name)* |
+| **Create** | "+ Add Budget" button on `/budgets` opens `/budgets/new`; enter month (`YYYY-MM`), optional category (blank = overall monthly budget) and amount, then press Save.|
+| **Read** | `/budgets` shows a Month filter (defaults to the current month) and a table with Category, Budget, Spent, Remaining, Usage and Actions. The Dashboard link opens `/budgets/dashboard`, which lists the same usage for every budget of the month.|
+| **Update** | Each row has an Edit button that opens `/budgets/:id/edit`; change category or amount then press Save. |
+| **Delete** | Each row has a Delete button that submits to `/budgets/:id/delete` and removes that budget. |
 
 **Saving goals** (`/goals`)
 
