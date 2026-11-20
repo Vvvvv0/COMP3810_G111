@@ -233,29 +233,33 @@ Run the commands in this order: create (copy the `_id` from the reply as `GID`),
 
 #### Budgets APIs 
 
+
+
 Paths: `GET /api/budgets`, `POST /api/budgets`, `PUT /api/budgets/:id`,
-`DELETE /api/budgets/:id`, `GET /api/budgets/summary`. No login required.
-Replace ID with a userId and BID with a budget's `_id` (returned when the budget is created).
+`DELETE /api/budgets/:id`, `GET /api/transactions/:id`, `GET /api/reports/summary`.
+Replace ID with a userId, BID with a budget's `_id` and TID with a transaction's `_id`.
 
 ```
-# CREATE
+# CREATE budget
 curl -X POST -H "Content-Type: application/json" --data '{"userId":"ID","month":"2026-11","category":"food","amount":500}' localhost:8099/api/budgets
 
 # READ - list budgets for a month
 curl -X GET "localhost:8099/api/budgets?userId=ID&month=2026-11"
-
-# SUMMARY - total budget, spent, remaining and usage percent
-curl -X GET "localhost:8099/api/budgets/summary?userId=ID&month=2026-11"
 
 # UPDATE - send the month, category and the new amount
 curl -X PUT -H "Content-Type: application/json" --data '{"userId":"ID","month":"2026-11","category":"food","amount":800}' localhost:8099/api/budgets/BID
 
 # DELETE
 curl -X DELETE "localhost:8099/api/budgets/BID?userId=ID"
+
+# TRANSACTION DETAILS - one record, 404 if it is not the user's
+curl -X GET "localhost:8099/api/transactions/TID?userId=ID"
+
+# MONTHLY SUMMARY - total budget, spent, remaining and usage percent
+curl -X GET "localhost:8099/api/reports/summary?userId=ID&month=2026-11"
+
 ```
-
-Replies: create 201 with the new _id, read and summary 200, update and delete 200 {"ok":true}. A missing userId, a month not in YYYY-MM form or an amount <= 0 gives 400. A budget that does not exist or belongs to another user gives 404. Posting the same user, month and category twice gives 409.
-
+Replies: create 201, read / transaction detail / summary 200, update and delete 200 {"ok":true}. A missing userId or an invalid amount gives 400; an id that does not exist or belongs to another user gives 404; a duplicate user + month + category gives 409.
 
 
 
