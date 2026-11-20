@@ -137,7 +137,7 @@ The top bar shows the links **Transactions, Budgets, Goals, Profile, Logout** af
 | **Update** | *(button / page name)* |
 | **Delete** | *(button name)* |
 
-**Budgets and dashboard** (`/budgets`, `/dashboard`) - **TODO (Member 4): fill in before submission**
+**Budgets and dashboard** (`/budgets`, `/dashboard`) -  (Member 4): fill in before submission**
 
 | Function | Button or UI |
 |---|---|
@@ -231,7 +231,7 @@ Run the commands in this order: create (copy the `_id` from the reply as `GID`),
 
 *Add the paths, the request body and the curl command for each of GET, POST, PUT and DELETE.*
 
-#### Budgets APIs - TODO
+#### Budgets APIs 
 
 Paths: `GET /api/budgets`, `POST /api/budgets`, `PUT /api/budgets/:id`,
 `DELETE /api/budgets/:id`, `GET /api/budgets/summary`. No login required.
