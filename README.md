@@ -41,7 +41,7 @@ All data belongs to the logged-in user. The server also offers RESTful services,
 | 3 | Chau Wai Ming (13874632) | Transactions: create, read/search/filter, update, delete (pages and REST API), calculation helpers |
 | 4 | Chen Si Wei (13772098) | Budgets: create, read, update, delete (pages and REST API), budget usage, dashboard, summary API |
 
-```
+---
 
 ## 3. Project file introduction
 
