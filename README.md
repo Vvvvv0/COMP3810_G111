@@ -186,7 +186,7 @@ The APIs return JSON. Test them from a **second terminal** while the server runs
 
 Replace `ID` with a `userId` and `GID` with a goal's `_id` (returned when the goal is created).
 
-#### User APIs (Member 2)
+#### User APIs 
 
 ```
 # CREATE - register
@@ -204,7 +204,7 @@ curl -b cookies.txt -X PUT -H "Content-Type: application/json" --data '{"userId"
 
 Replies: register `201 {"message":"User registered successfully","userId":"..."}`; login `200 {"message":"Login successful","userId":"..."}`; profile without a login `401 {"error":"Please log in first"}`; weak password or duplicate user `400 {"error":...}`; wrong login `401 {"error":"Invalid username or password"}`.
 
-#### Goals APIs (Member 1)
+#### Goals APIs 
 
 ```
 # CREATE
@@ -227,11 +227,11 @@ Replies: create `201`, update `200`, add savings `201` with `reachedTarget` true
 
 Run the commands in this order: create (copy the `_id` from the reply as `GID`), read, update, add savings, delete.
 
-#### Transactions APIs (Member 3) - TODO
+#### Transactions APIs - TODO
 
 *Add the paths, the request body and the curl command for each of GET, POST, PUT and DELETE.*
 
-#### Budgets APIs (Member 4) - TODO
+#### Budgets APIs - TODO
 
 *Add the paths, the request body and the curl command for each of GET, POST, PUT and DELETE, and for the summary API.*
 
