@@ -256,7 +256,7 @@ curl -X DELETE "localhost:8099/api/budgets/BID?userId=ID"
 
 Replies: create 201 with the new _id, read and summary 200, update and delete 200 {"ok":true}. A missing userId, a month not in YYYY-MM form or an amount <= 0 gives 400. A budget that does not exist or belongs to another user gives 404. Posting the same user, month and category twice gives 409.
 
-
+---
 
 ## 5. Notes
 
