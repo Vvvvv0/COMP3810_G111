@@ -41,13 +41,6 @@ All data belongs to the logged-in user. The server also offers RESTful services,
 | 3 | Chau Wai Ming (13874632) | Transactions: create, read/search/filter, update, delete (pages and REST API), calculation helpers |
 | 4 | Chen Si Wei (13772098) | Budgets: create, read, update, delete (pages and REST API), budget usage, dashboard, summary API |
 
-**Project file intro:**
-server.js:
-package.json:
-public:
-views:
-models:
-
 ```
 
 ## 3. Project file introduction
@@ -71,13 +64,12 @@ comp3810sef_group111/
 │   ├── budgets.js
 │   └── goals.js
 ├── views/
-│   ├── home/        (index.ejs, footer.ejs, home.ejs)
+│   ├── home/        (index.ejs, home.ejs)
 │   ├── auth/        (login.ejs, register.ejs)
 │   ├── profile/     (profile.ejs)
 │   ├── goals/       (list.ejs, form.ejs)
-│   ├── transactions/
-│   ├── budgets/
-│   └── dashboard/
+│   ├── transactions/(edit.ejs, list.ejs, new.ejs)
+│   ├── budgets/     (dashboard.ejs, form.ejs, list.ejs)  
 └── public/
     └── style.css
 ```
