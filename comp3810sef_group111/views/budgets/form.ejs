@@ -1,0 +1,59 @@
+<%- include('../home/index') %>
+<div class="form-container">
+  <h2><%= editing ? 'Edit Budget' : 'Add Budget' %></h2>
+
+  <% if (errors) { %>
+  <div class="error"><%= errors %></div>
+  <% } %>
+
+  <form
+    method="POST"
+    action="<%= editing ? `/budgets/${values._id}/update` : '/budgets' %>"
+  >
+    <div class="form-group">
+      <label for="month">Month</label>
+      <input type="month" id="month" name="month" value="<%= values.month %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category (leave blank for overall budget)</label>
+      <input
+        type="text"
+        id="category"
+        name="category"
+        list="category-options"
+        value="<%= values.category || '' %>"
+        placeholder="e.g. food, transportation"
+      >
+      <datalist id="category-options">
+        <option value="food"></option>
+        <option value="transportation"></option>
+        <option value="shopping"></option>
+        <option value="entertainment"></option>
+        <option value="housing"></option>
+        <option value="health"></option>
+        <option value="education"></option>
+        <option value="other"></option>
+      </datalist>
+      <p class="hint">Use the same category name as in your transactions.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Budget amount</label>
+      <input
+        type="number"
+        id="amount"
+        name="amount"
+        step="0.01"
+        min="0.01"
+        value="<%= values.amount %>"
+        required
+      >
+    </div>
+
+    <div class="bg-actions">
+      <button type="submit"><%= editing ? 'Save Changes' : 'Create Budget' %></button>
+      <a href="/budgets">Cancel</a>
+    </div>
+  </form>
+</div>

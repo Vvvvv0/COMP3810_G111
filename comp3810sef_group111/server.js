@@ -1,8 +1,6 @@
 const express = require('express');
 const session = require('cookie-session');
 const { MongoClient } = require('mongodb');
-const requireLogin = require('./middleware/auth');
-
 const app = express();
 const PORT = process.env.PORT || 8099;
 const uri = 'mongodb+srv://Venus:Fung2006@cluster0.p7mch1n.mongodb.net/';  
@@ -10,8 +8,75 @@ const dbName = 'COMP3810sef';
 const SECRETKEY = 'comp3810-group111-secret';
 const client = new MongoClient(uri);
 
+
+// Authentication and validation functions
+function requireLogin(req, res, next) {
+  if (!req.session || !req.session.userId) {
+    return res.redirect('/login');
+  }
+  next();
+}
+
+// Set password errors for such rules:
+// 1. >= 8 characters
+// 2. At least one uppercase letter
+// 3. At least one lowercase letter
+// 4. Password must contain at least one number
+// 5. Password must contain only letters and numbers
+// 6. Password must not contain the username
+// 7. Passwords must match
+
+
+
+function passwordErrors(password,confirmPassword,username) {
+  const errors = [];
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  if (!/[^A-Za-z0-9\s]/.test(password)) {
+    errors.push('Password must contain at least one special character');
+  }
+  if (username && password.toLowerCase().includes(username.toLowerCase())) {
+    errors.push('Password must not contain the username');
+  }
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match');
+  }
+  if (password.length === 0) {
+    errors.push('Password is required');
+  }
+  if (/\s/.test(password)) {
+    errors.push('Password must not contain spaces');
+  } 
+  return errors;
+
+  
+}
+
+function validateEmail(email) {
+  if (!email) return 'Email is required';
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return 'Invalid email format.Vaild email format: user@example.com';
+  }
+  return null;
+}
+
+app.locals.passwordErrors = passwordErrors;
+app.locals.validateEmail = validateEmail;
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
+app.use('/public', express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,12 +102,12 @@ app.use((req, res, next) => {
 
 // Public pages
 app.use('/', require('./routes/auth').pages);
-
+app.use('/api',require('./routes/auth').api);
 // RESTful APIs (no login, per spec)
 app.use('/api/transactions', require('./routes/transactions').api);
 app.use('/api/budgets', require('./routes/budgets').api);
 app.use('/api/goals', require('./routes/goals').api);
-
+app.use('/api/profile', require('./routes/profile').api);
 // CRUD pages (login required)
 app.use('/profile', requireLogin, require('./routes/profile').pages);
 app.use('/transactions', requireLogin, require('./routes/transactions').pages);
@@ -65,7 +130,7 @@ async function main() {
 
   app.listen(PORT, function (err) {
     if (err) console.log(err);
-    console.log('Server listening on PORT', PORT);
+    console.log(`Personal Expense and Budget Tracker App listening at http://localhost:${PORT}`)
   });
 }
 

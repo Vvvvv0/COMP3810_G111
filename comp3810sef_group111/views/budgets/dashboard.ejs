@@ -1,0 +1,29 @@
+<%- include('../home/index') %>
+<main>
+  <div class="bg-bar">
+    <h2>Budget Dashboard: <%= month %></h2>
+    <a href="/budgets?month=<%= month %>">Back to budgets</a>
+  </div>
+
+  <% if (budgets.length === 0) { %>
+  <p class="hint">No budgets for this month yet.</p>
+  <% } %>
+
+  <% budgets.forEach(function (bg) {
+       var pct = Number(bg.usagePct) || 0;
+       var state = pct >= 100 ? 'over' : (pct >= 80 ? 'near' : 'ok');
+       var label = pct >= 100 ? 'Over budget' : (pct >= 80 ? 'Near limit' : 'On track');
+  %>
+  <div class="bg-item">
+    <div class="bg-item-head">
+      <strong><%= bg.category || 'Overall' %></strong>
+      <span class="badge <%= state %>"><%= label %></span>
+    </div>
+    <div class="bar"><div class="bar-fill <%= state %>" style="width: <%= Math.min(pct, 100) %>%"></div></div>
+    <p>
+      Budget: <%= bg.amount %> &middot; Spent: <%= bg.spentAmount %> &middot;
+      Remaining: <%= bg.remaining %> &middot; Usage: <%= pct %>%
+    </p>
+  </div>
+  <% }); %>
+</main>

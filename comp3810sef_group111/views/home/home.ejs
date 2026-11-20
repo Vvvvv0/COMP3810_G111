@@ -1,0 +1,49 @@
+<%- include('index') %>
+<%
+  var loggedIn = !!(locals.user && locals.user.userId);
+%>
+<main class="home">
+
+  <section class="hero">
+    <h1>Take control of your money</h1>
+    <p>Personal Expense and Budget Tracker helps you record what you earn and spend,
+       plan your monthly budgets and reach your saving goals, all in one place.</p>
+%>
+  </section>
+
+  <section>
+    <h2>What you can do</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>Track income and expenses</h3>
+        <p>Record every transaction with a category and a date, then search and filter to see where your money goes.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Plan monthly budgets</h3>
+        <p>Set a spending limit for a month or a category and see how much you have used and how much is left.</p>
+      </div>
+      <div class="feature-card">
+        <h3>See it at a glance</h3>
+        <p>The dashboard shows your total income, expenses, balance and budget usage for the month.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Reach your saving goals</h3>
+        <p>Create goals such as a trip or a new laptop, add savings as you go and follow your progress.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Create an account</strong> and log in. Your records are private to you.</li>
+      <li><strong>Add your transactions and set a budget</strong> for the month.</li>
+      <li><strong>Create your personal goals</strong> and stay on track to reach them.</li>
+      <li><strong>Check the budget dashboard and your goals</strong> to see how you are doing.</li>
+    </ol>
+  </section>
+
+  <p class="home-foot">COMP 3810SEF &middot; Group 111</p>
+</main>
+</body>
+</html>
