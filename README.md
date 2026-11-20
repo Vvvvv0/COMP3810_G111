@@ -11,8 +11,8 @@ COMP 3810SEF Autumn 2026 - Group Project - Group 111
 **Purpose:** A server-side web application that helps a person keep control of their money. A registered user can:
 
 - log in and out, and manage their own profile;
-- record income and expense transactions, and search them by type, category and date (Member 3);
-- set monthly budgets and compare them with real spending, with a dashboard summary (Member 4);
+- record income and expense transactions, and search them by type, category and date ;
+- set monthly budgets and compare them with real spending, with a dashboard summary ;
 - create saving goals, add savings, and follow the progress and status of each goal.
 
 All data belongs to the logged-in user. The server also offers RESTful services, which can be tested with `curl`.
