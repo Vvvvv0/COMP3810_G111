@@ -48,38 +48,6 @@ public:
 views:
 models:
 
----
-
-## 3. Project file introduction
-
-```
-comp3810sef_group111/
-├── server.js
-├── package.json
-├── README.md
-├── middleware/
-│   └── auth.js
-├── models/
-│   ├── user.js
-│   ├── transaction.js
-│   ├── budget.js
-│   └── goal.js
-├── routes/
-│   ├── auth.js
-│   ├── profile.js
-│   ├── transactions.js
-│   ├── budgets.js
-│   └── goals.js
-├── views/
-│   ├── home/        (index.ejs, footer.ejs, home.ejs)
-│   ├── auth/        (login.ejs, register.ejs)
-│   ├── profile/     (profile.ejs)
-│   ├── goals/       (list.ejs, form.ejs)
-│   ├── transactions/
-│   ├── budgets/
-│   └── dashboard/
-└── public/
-    └── style.css
 ```
 
 ## 3. Project file introduction
