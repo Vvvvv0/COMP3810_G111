@@ -177,10 +177,21 @@ pages.get('/:id', async (req, res) => {
     return res.status(404).send('404 Not Found');
   }
 
-  res.render('transactions/detail', {
+  const amt = Number(t.amount) || 0;
+
+  res.render('transactions/list', {
     title: 'Transaction Details',
     user: req.session,
-    t,
+    transactions: [t],
+    filter: {},
+    categories: tx.CATEGORIES,
+    summary: {
+      income: t.type === 'income' ? amt : 0,
+      expense: t.type === 'expense' ? amt : 0,
+      net: t.type === 'income' ? amt : -amt,
+    },
+    success: null,
+    errors: null,
   });
 });
 module.exports = { pages, api };
