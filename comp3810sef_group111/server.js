@@ -1,6 +1,9 @@
 const express = require('express');
 const session = require('cookie-session');
 const { MongoClient } = require('mongodb');
+const { monthRange } = require('./models/budget');
+const { sumExpenseByCategory } = require('./models/transaction');
+
 const requireLogin = require('./middleware/auth');
 
 const app = express();
@@ -48,7 +51,42 @@ app.use('/profile', requireLogin, require('./routes/profile').pages);
 app.use('/transactions', requireLogin, require('./routes/transactions').pages);
 app.use('/budgets', requireLogin, require('./routes/budgets').pages);
 app.use('/goals', requireLogin, require('./routes/goals').pages);
+//[Member 4] Budget usage: spent / remaining / usage% 
+// Uses Member 3's aggregation (sumExpenseByCategory) so spending is calculated in one place only.
+async function getBudgetUsage(userId, month) {
+  const db = client.db(dbName);
 
+  const budgets = await db
+    .collection('budgets')
+    .find({ userId: String(userId), month })
+    .toArray();
+
+  const rows = await sumExpenseByCategory(db, String(userId), monthRange(month));
+
+  const byCategory = {};
+  let overall = 0;
+  rows.forEach((r) => {
+    const amt = Number(r.total) || 0;
+    byCategory[r.category] = amt;
+    overall += amt;
+  });
+
+  return budgets.map((bg) => {
+    const amount = Number(bg.amount) || 0;
+    const spentAmount = bg.category ? byCategory[bg.category] || 0 : overall;
+    const remaining = amount - spentAmount;
+    const usagePct = amount > 0 ? Math.round((spentAmount / amount) * 100) : 0;
+
+    return {
+      ...bg,
+      spentAmount,
+      remaining,
+      usagePct,
+      warning: usagePct >= 80,
+    };
+  });
+}
+app.locals.getBudgetUsage = getBudgetUsage;
 // 404 and errors, last
 app.use((req, res) => {
   res.status(404).send('404 Not Found');
