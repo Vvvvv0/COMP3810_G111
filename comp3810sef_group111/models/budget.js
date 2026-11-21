@@ -2,10 +2,6 @@
 // Fields: userId (string), month ('YYYY-MM'), category (string, '' = overall budget),
 //         amount (> 0), createdAt
 const { ObjectId } = require('mongodb');
-
-let transaction = null;
-try { transaction = require('./transaction'); } catch (e) { transaction = null; }
-
 const COLLECTION = 'budgets';
 
 // Validation: returns an error message, or null if valid
@@ -18,6 +14,17 @@ const validateBudget = (b) => {
 
 // Normalize a blank category to '' so an overall budget is stored consistently.
 const normalizeCategory = (category) => (category && category.trim()) || '';
+
+// First and last calendar day of 'YYYY-MM', used with Member 3's date range helper.
+const monthRange = (month) => {
+  const y = Number(month.slice(0, 4));
+  const m = Number(month.slice(5, 7));
+  const lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return {
+    from: `${month}-01`,
+    to: `${month}-${String(lastDay).padStart(2, '0')}`,
+  };
+};
 
 // Data-access functions (driver layer, no req/res)
 const findBudgets = (db, filter) =>
@@ -43,30 +50,21 @@ const findDuplicate = (db, { userId, month, category }) =>
     category: normalizeCategory(category),
   });
 
-// Spent per month: uses Member 3's getSpentByCategory when it is exported,
-// otherwise falls back to a date-range sum over the transactions collection.
+// Spending for a month, using Member 3's aggregation (do not recalculate separately).
+const transactionModel = require('./transaction');
+
 const getSpent = async (db, userId, month) => {
-  if (transaction && typeof transaction.getSpentByCategory === 'function') {
-    return transaction.getSpentByCategory(db, userId, month);
-  }
-
-  const start = new Date(`${month}-01T00:00:00.000Z`);
-  const end = new Date(start);
-  end.setUTCMonth(end.getUTCMonth() + 1);
-
-  const txs = await db.collection('transactions').find({
-    userId,
-    type: 'expense',
-    date: { $gte: start, $lt: end },
-  }).toArray();
+  const { from, to } = monthRange(month);
+  const rows = await transactionModel.sumExpenseByCategory(db, String(userId), { from, to });
 
   const byCategory = {};
   let overall = 0;
-  txs.forEach((t) => {
-    const amt = Number(t.amount) || 0;
+  rows.forEach((r) => {
+    const amt = Number(r.total) || 0;
+    byCategory[r.category] = amt;
     overall += amt;
-    byCategory[t.category] = (byCategory[t.category] || 0) + amt;
   });
+
   return { overall, byCategory };
 };
 
@@ -97,6 +95,7 @@ module.exports = {
   COLLECTION,
   validateBudget,
   normalizeCategory,
+  monthRange,
   findBudgets,
   findBudget,
   insertBudget,
