@@ -118,7 +118,7 @@ pages.get('/:id/edit', async (req, res) => {
   });
 });
 
-//Update budget
+// Update budget
 pages.post('/:id/update', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).send('404 Not Found');
   const userId = req.session.userId;
@@ -167,6 +167,7 @@ pages.post('/:id/delete', async (req, res) => {
 });
 
 // RESTful APIs: budget CRUD (mounted under /api/budgets, no login per spec)
+
 // GET /api/budgets?userId=...&month=YYYY-MM
 api.get('/', async (req, res) => {
   const { userId, month } = req.query;
@@ -198,18 +199,27 @@ api.post('/', async (req, res) => {
 // PUT /api/budgets/:id
 api.put('/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).json({ error: 'Invalid id' });
-  const filter = {
-    _id: new budget.ObjectId(req.params.id),
-    userId: req.body.userId || req.query.userId,
-  };
+
+  const userId = req.body.userId || req.query.userId;
   const changes = {
     month: req.body.month,
     category: budget.normalizeCategory(req.body.category),
     amount: Number(req.body.amount),
   };
-  const error = budget.validateBudget({ userId: filter.userId, ...changes });
+
+  const error = budget.validateBudget({ userId, ...changes });
   if (error) return res.status(400).json({ error });
 
+  const dup = await budget.findDuplicate(req.db, {
+    userId,
+    month: changes.month,
+    category: changes.category,
+  });
+  if (dup && String(dup._id) !== req.params.id) {
+    return res.status(409).json({ error: 'Duplicate budget.' });
+  }
+
+  const filter = { _id: new budget.ObjectId(req.params.id), userId };
   const result = await budget.updateBudget(req.db, filter, changes);
   if (result.matchedCount === 0) return res.status(404).json({ error: 'Not found' });
   res.json({ ok: true });
@@ -218,10 +228,11 @@ api.put('/:id', async (req, res) => {
 // DELETE /api/budgets/:id
 api.delete('/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).json({ error: 'Invalid id' });
-  const filter = {
-    _id: new budget.ObjectId(req.params.id),
-    userId: req.body.userId || req.query.userId,
-  };
+
+  const userId = req.body.userId || req.query.userId;
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+
+  const filter = { _id: new budget.ObjectId(req.params.id), userId };
   const result = await budget.deleteBudget(req.db, filter);
   if (result.deletedCount === 0) return res.status(404).json({ error: 'Not found' });
   res.json({ ok: true });
