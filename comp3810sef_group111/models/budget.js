@@ -2,9 +2,13 @@
 // Fields: userId (string), month ('YYYY-MM'), category (string, '' = overall budget),
 //         amount (> 0), createdAt
 const { ObjectId } = require('mongodb');
+
+let transaction = null;
+try { transaction = require('./transaction'); } catch (e) { transaction = null; }
+
 const COLLECTION = 'budgets';
 
-//Validation: returns an error message, or null if valid 
+// Validation: returns an error message, or null if valid
 const validateBudget = (b) => {
   if (!b.userId) return 'userId is required';
   if (!b.month || !/^\d{4}-\d{2}$/.test(b.month)) return 'month must be YYYY-MM';
@@ -15,7 +19,7 @@ const validateBudget = (b) => {
 // Normalize a blank category to '' so an overall budget is stored consistently.
 const normalizeCategory = (category) => (category && category.trim()) || '';
 
-//Data-access functions (driver layer, no req/res)
+// Data-access functions (driver layer, no req/res)
 const findBudgets = (db, filter) =>
   db.collection(COLLECTION).find(filter).toArray();
 
@@ -39,14 +43,21 @@ const findDuplicate = (db, { userId, month, category }) =>
     category: normalizeCategory(category),
   });
 
-// TODO(Member 3): once his getSpentByCategory(db, userId, month) is exported from
-// models/transaction.js (returning { overall, byCategory }), replace the fallback
-// below with his function. Do not keep a separate calculation after that.
+// Spent per month: uses Member 3's getSpentByCategory when it is exported,
+// otherwise falls back to a date-range sum over the transactions collection.
 const getSpent = async (db, userId, month) => {
+  if (transaction && typeof transaction.getSpentByCategory === 'function') {
+    return transaction.getSpentByCategory(db, userId, month);
+  }
+
+  const start = new Date(`${month}-01T00:00:00.000Z`);
+  const end = new Date(start);
+  end.setUTCMonth(end.getUTCMonth() + 1);
+
   const txs = await db.collection('transactions').find({
     userId,
     type: 'expense',
-    date: { $regex: `^${month}` },
+    date: { $gte: start, $lt: end },
   }).toArray();
 
   const byCategory = {};
@@ -59,7 +70,7 @@ const getSpent = async (db, userId, month) => {
   return { overall, byCategory };
 };
 
-//Budget usage: spent amount, remaining amount, usage percentage
+// Budget usage: spent amount, remaining amount, usage percentage
 const getBudgetUsage = async (db, userId, month) => {
   const budgets = await findBudgets(db, { userId, month });
   const spent = await getSpent(db, userId, month);
@@ -76,7 +87,7 @@ const getBudgetUsage = async (db, userId, month) => {
       spentAmount,
       remaining,
       usagePct,
-      warning: usagePct >= 80, // optional 80% warning
+      warning: usagePct >= 80,
     };
   });
 };
