@@ -169,5 +169,18 @@ api.delete('/:id', async (req, res) => {
   if (result.deletedCount === 0) return res.status(404).json({ error: 'not found' });
   res.status(200).json({ data: { _id: req.params.id } });
 });
+// [Member 4] Transaction details page  GET /transactions/:id
+pages.get('/:id', async (req, res) => {
+  const t = await tx.findTransactionById(req.db, req.params.id);
 
+  if (!t || String(t.userId) !== uid(req)) {
+    return res.status(404).send('404 Not Found');
+  }
+
+  res.render('transactions/detail', {
+    title: 'Transaction Details',
+    user: req.session,
+    t,
+  });
+});
 module.exports = { pages, api };
