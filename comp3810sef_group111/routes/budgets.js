@@ -2,7 +2,7 @@
 const express = require('express');
 const pages = express.Router();
 const api = express.Router();
-
+const reports = express.Router();
 const budget = require('../models/budget');
 
 const currentMonth = () => {
@@ -18,13 +18,19 @@ const isValidId = (id) => {
   }
 };
 
-// Web pages (mounted under /budgets, protected by requireLogin)
+// Use the Member 4 getBudgetUsage implemented in server.js; fall back to the model if it is not exposed
+const getUsage = (req, userId, month) =>
+  req.app.locals.getBudgetUsage
+    ? req.app.locals.getBudgetUsage(userId, month)
+    : budget.getBudgetUsage(req.db, userId, month);
+
+//  Web pages (mounted under /budgets, protected by requireLogin) 
 
 // Budget list page for the selected month (own records only)
 pages.get('/', async (req, res) => {
   const userId = req.session.userId;
   const month = req.query.month || currentMonth();
-  const budgets = await budget.getBudgetUsage(req.db, userId, month);
+  const budgets = await getUsage(req, userId, month);
   res.render('budgets/list', {
     title: 'Budgets',
     user: req.session,
@@ -38,7 +44,7 @@ pages.get('/', async (req, res) => {
 pages.get('/dashboard', async (req, res) => {
   const userId = req.session.userId;
   const month = req.query.month || currentMonth();
-  const budgets = await budget.getBudgetUsage(req.db, userId, month);
+  const budgets = await getUsage(req, userId, month);
   res.render('budgets/dashboard', {
     title: 'Budget Dashboard',
     user: req.session,
@@ -166,7 +172,7 @@ pages.post('/:id/delete', async (req, res) => {
   res.redirect('/budgets');
 });
 
-// RESTful APIs: budget CRUD (mounted under /api/budgets, no login per spec)
+// RESTful budget APIs (mounted under /api/budgets, no login per spec)
 
 // GET /api/budgets?userId=...&month=YYYY-MM
 api.get('/', async (req, res) => {
@@ -196,11 +202,13 @@ api.post('/', async (req, res) => {
   res.status(201).json({ _id: result.insertedId, ...doc });
 });
 
-// PUT /api/budgets/:id
+// PUT /api/budgets/:id (duplicate check + userId validation)
 api.put('/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).json({ error: 'Invalid id' });
 
   const userId = req.body.userId || req.query.userId;
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+
   const changes = {
     month: req.body.month,
     category: budget.normalizeCategory(req.body.category),
@@ -225,7 +233,7 @@ api.put('/:id', async (req, res) => {
   res.json({ ok: true });
 });
 
-// DELETE /api/budgets/:id
+// DELETE /api/budgets/:id (userId validation)
 api.delete('/:id', async (req, res) => {
   if (!isValidId(req.params.id)) return res.status(404).json({ error: 'Invalid id' });
 
@@ -238,4 +246,33 @@ api.delete('/:id', async (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = { pages, api };
+// Monthly summary API (mounted under /api/reports in server.js) 
+
+// GET /api/reports/summary?userId=...&month=YYYY-MM
+reports.get('/summary', async (req, res) => {
+  const { userId, month } = req.query;
+
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+    return res.status(400).json({ error: 'month must be YYYY-MM' });
+  }
+
+  const rows = await getUsage(req, userId, month);
+
+  const totalBudget = rows.reduce((s, b) => s + (Number(b.amount) || 0), 0);
+  const totalSpent = rows.reduce((s, b) => s + (Number(b.spentAmount) || 0), 0);
+  const remaining = totalBudget - totalSpent;
+  const usagePct = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+
+  res.json({
+    userId,
+    month,
+    totalBudget,
+    totalSpent,
+    remaining,
+    usagePct,
+    budgets: rows,
+  });
+});
+
+module.exports = { pages, api, reports };
