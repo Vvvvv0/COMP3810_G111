@@ -11,8 +11,12 @@ const validateTransaction = (t) => {
   return null;
 };
 
-const findTransactions = (db, filter) => db.collection(COLLECTION).find(filter).toArray();
-const insertTransaction = (db, doc) => db.collection(COLLECTION).insertOne({ ...doc, createdAt: new Date() });
+const findTransactions = (db, filter, skip = 0, limit = 0) => {
+  let query = db.collection(COLLECTION).find(filter).sort({ date: -1, createdAt: -1 });
+  if (skip) query = query.skip(skip);
+  if (limit) query = query.limit(limit);
+  return query.toArray();
+};const insertTransaction = (db, doc) => db.collection(COLLECTION).insertOne({ ...doc, createdAt: new Date() });
 const updateTransaction = (db, filter, changes) => db.collection(COLLECTION).updateOne(filter, { $set: changes });
 const deleteTransaction = (db, filter) => db.collection(COLLECTION).deleteOne(filter);
 
