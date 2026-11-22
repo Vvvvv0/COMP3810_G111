@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">Budget App</a>
+  <nav>
+    <a href="/transactions">Transactions</a>
+    <a href="/budgets">Budgets</a>
+    <a href="/goals">Goals</a>
+    <a href="/profile">Profile</a>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+<main>
+  <h1>Transaction Details</h1>
+  <div class="form-container" style="max-width:100%;">
+    <p><strong>Date:</strong> <%= new Date(transaction.date).toISOString().slice(0, 10) %></p>
+    <p><strong>Type:</strong> <%= transaction.type %></p>
+    <p><strong>Category:</strong> <%= transaction.category %></p>
+    <p><strong>Amount:</strong> <%= transaction.amount %></p>
+    <p><strong>Note:</strong> <%= transaction.note || 'N/A' %></p>
+    <br>
+    <a href="/transactions/<%= transaction._id %>/edit">Edit this transaction</a> | 
+    <a href="/transactions">Back to list</a>
+  </div>
+</main>
+</body>
+</html>
