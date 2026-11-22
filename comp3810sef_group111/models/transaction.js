@@ -93,7 +93,15 @@ const sumByMonth = async (db, userId, year) => {
 };
 
 module.exports = {
-  ObjectId, validateTransaction, findTransactions, insertTransaction, updateTransaction, deleteTransaction,
+  ObjectId, validateTransaction, insertTransaction, updateTransaction, deleteTransaction,
   CATEGORIES, buildFilter, findTransactionById,
-  sumByType, sumExpenseByCategory, sumByMonth
+  sumByType, sumExpenseByCategory, sumByMonth,
+  getTotals: sumByType,
+  getSpentByCategory: sumExpenseByCategory,
+  findTransactions: (db, filter, skip = 0, limit = 0) => {
+    let query = db.collection(COLLECTION).find(filter).sort({ date: -1, createdAt: -1 });
+    if (skip) query = query.skip(skip);
+    if (limit) query = query.limit(limit);
+    return query.toArray();
+  }
 };
