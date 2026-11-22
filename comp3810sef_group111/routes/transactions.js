@@ -202,5 +202,29 @@ api.delete('/:id', async (req, res) => {
   if (result.deletedCount === 0) return res.status(404).json({ error: 'not found' });
   res.status(200).json({ data: { _id: req.params.id } });
 });
+// [Member 4] Transaction details page  GET /transactions/:id
+pages.get('/:id', async (req, res) => {
+  const t = await tx.findTransactionById(req.db, req.params.id);
 
+  if (!t || String(t.userId) !== uid(req)) {
+    return res.status(404).send('404 Not Found');
+  }
+
+  const amt = Number(t.amount) || 0;
+
+  res.render('transactions/list', {
+    title: 'Transaction Details',
+    user: req.session,
+    transactions: [t],
+    filter: {},
+    categories: tx.CATEGORIES,
+    summary: {
+      income: t.type === 'income' ? amt : 0,
+      expense: t.type === 'expense' ? amt : 0,
+      net: t.type === 'income' ? amt : -amt,
+    },
+    success: null,
+    errors: null,
+  });
+});
 module.exports = { pages, api };

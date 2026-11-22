@@ -108,6 +108,8 @@ app.use('/api/transactions', require('./routes/transactions').api);
 app.use('/api/budgets', require('./routes/budgets').api);
 app.use('/api/reports', require('./routes/budgets').reports);
 app.use('/api/goals', require('./routes/goals').api);
+app.use('/api/reports', require('./routes/budgets').reports);
+
 app.use('/api/profile', require('./routes/profile').api);
 // CRUD pages (login required)
 app.use('/profile', requireLogin, require('./routes/profile').pages);
