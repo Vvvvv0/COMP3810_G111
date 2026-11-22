@@ -1,4 +1,4 @@
-// routes/transactions.js  [Member 3 replaces]  
+// routes/transactions.js
 const express = require('express');
 const tx = require('../models/transaction');
 
@@ -116,15 +116,48 @@ pages.post('/:id/delete', async (req, res) => {
   res.redirect('/transactions?success=deleted');
 });
 
+// [Member 4] Transaction details page  GET /transactions/:id
+pages.get('/:id', async (req, res) => {
+  const t = await tx.findTransactionById(req.db, req.params.id);
+
+  if (!t || String(t.userId) !== uid(req)) {
+    return res.status(404).send('404 Not Found');
+  }
+
+  const amt = Number(t.amount) || 0;
+
+  res.render('transactions/list', {
+    title: 'Transaction Details',
+    user: req.session,
+    transactions: [t],
+    filter: {},
+    categories: tx.CATEGORIES,
+    summary: {
+      income: t.type === 'income' ? amt : 0,
+      expense: t.type === 'expense' ? amt : 0,
+      net: t.type === 'income' ? amt : -amt,
+    },
+    success: null,
+    errors: null,
+  });
+});
+
 api.get('/', async (req, res) => {
   if (!req.query.userId) return res.status(400).json({ error: 'userId is required' });
   const data = await tx.findTransactions(req.db, tx.buildFilter(req.query));
   res.status(200).json({ data });
 });
 
+// [Member 4] Transaction details API  GET /api/transactions/:id?userId=...
 api.get('/:id', async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: 'userId is required' });
+
   const t = await tx.findTransactionById(req.db, req.params.id);
-  if (!t) return res.status(404).json({ error: 'not found' });
+  if (!t || String(t.userId) !== String(userId)) {
+    return res.status(404).json({ error: 'not found' });
+  }
+
   res.status(200).json({ data: t });
 });
 
