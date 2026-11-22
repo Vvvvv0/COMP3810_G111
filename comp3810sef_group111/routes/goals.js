@@ -2,7 +2,6 @@
 // Saving goals: web pages (list, add, edit, delete, add savings) + REST API.
 const express = require('express');
 const goal = require('../models/goal');
-const user = require('../models/user');
 const pages = express.Router();
 const api = express.Router();
 
@@ -191,15 +190,15 @@ const apiFilter = (req, res, userId) => {
     res.status(400).json({ error: 'userId is required' });
     return null;
   }
-  if (!isId(userId)) {
-    res.status(400).json({ error: 'userId must be a 24-character id' });
+  if (userId.length > 50) {
+    res.status(400).json({ error: 'userId must be 50 characters or fewer' });
     return null;
   }
   if (!isId(req.params.id)) {
     res.status(400).json({ error: 'Invalid goal id' });
     return null;
   }
-  return { _id: new goal.ObjectId(req.params.id), userId: userId.toLowerCase() };
+  return { _id: new goal.ObjectId(req.params.id), userId: userId.trim() };
 };
 
 // Read: the user's goals. userId must be plain text (blocks tricks like ?userId[$ne]=x).
@@ -208,7 +207,7 @@ const sendGoals = async (req, res, userId) => {
     if (typeof userId !== 'string' || !userId) {
       return res.status(400).json({ error: 'userId is required' });
     }
-    const docs = await goal.findGoals(req.db, { userId: isId(userId) ? userId.toLowerCase() : userId });
+    const docs = await goal.findGoals(req.db, { userId: userId.trim() });
     res.status(200).json({ data: docs.map((d) => goal.withProgress(d)) });
   } catch (err) {
     res.status(500).json({ error: 'Unable to load goals' });
@@ -225,12 +224,9 @@ api.get('/', (req, res) => sendGoals(req, res, req.query.userId));
 api.post('/', async (req, res) => {
   try {
     const body = req.body || {};
-    if (!isId(body.userId)) {
-      return res.status(400).json({ error: 'userId is required (24-character user id)' });
-    }
-    const userId = body.userId.toLowerCase();
-    const owner = await user.findUser(req.db, { _id: new goal.ObjectId(userId) });
-    if (!owner) return res.status(404).json({ error: 'User not found' });
+    const userId = typeof body.userId === 'string' ? body.userId.trim() : '';
+    if (!userId) return res.status(400).json({ error: 'userId is required' });
+    if (userId.length > 50) return res.status(400).json({ error: 'userId must be 50 characters or fewer' });
 
     const values = formValues(body);
     const errors = goal.goalErrors(values);

@@ -22,12 +22,9 @@ function requireLogin(req, res, next) {
 // 2. At least one uppercase letter
 // 3. At least one lowercase letter
 // 4. Password must contain at least one number
-// 5. Password must contain only letters and numbers
+// 5. Password must contain at least one special character
 // 6. Password must not contain the username
 // 7. Passwords must match
-
-
-
 function passwordErrors(password,confirmPassword,username) {
   const errors = [];
   if (password.length < 8) {
@@ -56,10 +53,8 @@ function passwordErrors(password,confirmPassword,username) {
   }
   if (/\s/.test(password)) {
     errors.push('Password must not contain spaces');
-  } 
+  }
   return errors;
-
-  
 }
 
 function validateEmail(email) {
@@ -102,10 +97,11 @@ app.use((req, res, next) => {
 
 // Public pages
 app.use('/', require('./routes/auth').pages);
-app.use('/api',require('./routes/auth').api);
 // RESTful APIs (no login, per spec)
+app.use('/api', require('./routes/auth').api);
 app.use('/api/transactions', require('./routes/transactions').api);
 app.use('/api/budgets', require('./routes/budgets').api);
+app.use('/api/reports', require('./routes/budgets').reports);
 app.use('/api/goals', require('./routes/goals').api);
 app.use('/api/profile', require('./routes/profile').api);
 // CRUD pages (login required)

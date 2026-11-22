@@ -114,22 +114,17 @@ const {ObjectId} = require('mongodb');
       next(err);
     }
   });
+// REST API (no login; userId is given with each request, like the other APIs)
+// GET /api/profile?userId=...
 api.get('/', async (req, res) => {
   try {
-    if (!req.session || !req.session.userId) {
-    return res.status(401).json({error: 'Please log in first'});
-    }
     const userId = req.query.userId;
 
     if (typeof userId !== 'string' || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Unauthorized' });
+      return res.status(400).json({ error: 'Invalid userId' });
     }
 
     const id = new ObjectId(userId);
-    if (id.toHexString() !== req.session.userId) {
-    return res.status(403).json({error: 'You can only view your own profile'});
-    }
-    
     const found = await user.findUser(req.db, { _id: id });
 
     if (!found) {
@@ -144,12 +139,9 @@ api.get('/', async (req, res) => {
   }
 });
 
+// PUT /api/profile   body: { "userId": "...", "email": "...", "displayName": "..." }
 api.put('/', async (req, res) => {
   try {
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ error: 'Please log in first' });
-    }
-
     const body = req.body || {};
     const userId = body.userId;
 
@@ -158,10 +150,6 @@ api.put('/', async (req, res) => {
     }
 
     const id = new ObjectId(userId);
-
-    if (id.toHexString() !== req.session.userId) {
-      return res.status(403).json({ error: 'You can only update your own profile' });
-    }
 
     const found = await user.findUser(req.db, { _id: id });
 

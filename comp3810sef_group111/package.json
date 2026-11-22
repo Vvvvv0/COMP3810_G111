@@ -1,7 +1,7 @@
 {
   "name": "comp3810sef-group111",
-  "description": "COMP3810SEF Autumn 2026 Group Project - Personal Expense and Budget Tracker App",
-  "author": "Group 111",
+  "description": "COMP3810SEF Autumn 2026 Group Project - Budget App",
+  "author": "Group 111 (add member names and SIDs in README.md)",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
