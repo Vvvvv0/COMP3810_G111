@@ -6,8 +6,6 @@ const user = require('../models/user');
 const pages = express.Router();
 const api = express.Router();
 
-// ---------------- Small helpers used by the pages and the API ----------------
-
 // Short messages shown at the top of the list after an action.
 // The address only carries a code, e.g. /goals?msg=added
 const MESSAGES = {
@@ -62,11 +60,27 @@ const renderAddForm = (req, res, status, values, errors) => {
 };
 
 // Show the list page (used by the list route and when add-savings has an error)
+// Search options on the list page: a name keyword and a status (In progress, Completed, Overdue)
+const STATUS_FILTERS = ['In progress', 'Completed', 'Overdue'];
+
 const renderList = async (req, res, status, errors, message) => {
-  const goals = await goal.findGoals(req.db, { userId: req.session.userId });
-  goals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));   // newest first
+  const filters = {
+    keyword: typeof req.query.keyword === 'string' ? req.query.keyword.trim() : '',
+    status: typeof req.query.status === 'string' && STATUS_FILTERS.includes(req.query.status) ? req.query.status : ''
+  };
+  const all = await goal.findGoals(req.db, { userId: req.session.userId });
+  all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));   // newest first
+
+  let goals = all.map((g) => goal.withProgress(g));
+  if (filters.keyword) {
+    const word = filters.keyword.toLowerCase();
+    goals = goals.filter((g) => String(g.name).toLowerCase().includes(word));   // plain text match, no regex
+  }
+  if (filters.status) goals = goals.filter((g) => g.statusLabel === filters.status);
+
   res.status(status).render('goals/list', {
-    title: 'My Goals', user: req.session, goals, errors, message
+    title: 'My Goals', user: req.session, goals, errors, message,
+    filters, totalCount: all.length
   });
 };
 
@@ -180,6 +194,8 @@ pages.post('/:id/save', async (req, res, next) => {
 // ---------------- REST API (mounted at /api/goals, no login needed) ----------------
 // The owner is named with userId: in the query string (GET, DELETE) or in the JSON body (POST, PUT).
 //   GET    /api/goals?userId=...                 list the user's goals (with percent, remaining, statusLabel)
+//   GET    /api/goals/:id?userId=...             one goal
+//   search: /api/goals/user/:userId/keyword/:keyword/status/:status   (or ?keyword=...&status=... with quotes)
 //   POST   /api/goals                            create a goal
 //   PUT    /api/goals/:id                        change name, targetAmount or deadline
 //   DELETE /api/goals/:id?userId=...             delete a goal
@@ -202,24 +218,73 @@ const apiFilter = (req, res, userId) => {
   return { _id: new goal.ObjectId(req.params.id), userId: userId.toLowerCase() };
 };
 
-// Read: the user's goals. userId must be plain text (blocks tricks like ?userId[$ne]=x).
-const sendGoals = async (req, res, userId) => {
+// ---- Search options for the list API ----
+// keyword = part of the goal name (not case-sensitive)
+// status  = in-progress, completed or overdue (upper or lower case; "In progress" also works)
+const STATUS_NAMES = { 'in-progress': 'In progress', 'in progress': 'In progress', completed: 'Completed', overdue: 'Overdue' };
+const toStatusName = (v) => STATUS_NAMES[String(v).trim().toLowerCase()] || null;
+
+// Read: the user's goals, optionally searched.
+// userId, keyword and status must be plain text (blocks tricks like ?userId[$ne]=x).
+const sendGoals = async (req, res, userId, keywordInput, statusInput) => {
   try {
     if (typeof userId !== 'string' || !userId) {
       return res.status(400).json({ error: 'userId is required' });
     }
+    if (keywordInput !== undefined && typeof keywordInput !== 'string') {
+      return res.status(400).json({ error: 'keyword must be text' });
+    }
+    const keyword = (keywordInput || '').trim();
+
+    let status = '';
+    if (statusInput !== undefined && statusInput !== '') {
+      status = typeof statusInput === 'string' ? toStatusName(statusInput) : null;
+      if (!status) {
+        return res.status(400).json({ error: 'status must be in-progress, completed or overdue' });
+      }
+    }
+
     const docs = await goal.findGoals(req.db, { userId: isId(userId) ? userId.toLowerCase() : userId });
-    res.status(200).json({ data: docs.map((d) => goal.withProgress(d)) });
+    let list = docs.map((d) => goal.withProgress(d));
+    if (keyword) list = list.filter((g) => String(g.name).toLowerCase().includes(keyword.toLowerCase()));
+    if (status) list = list.filter((g) => g.statusLabel === status);
+
+    // "filters" and "count" show what the server really applied
+    res.status(200).json({ count: list.length, filters: { keyword, status }, data: list });
   } catch (err) {
     res.status(500).json({ error: 'Unable to load goals' });
   }
 };
 
-// GET /api/goals/user/:userId        (path style, as in Lecture 8)
-api.get('/user/:userId', (req, res) => sendGoals(req, res, req.params.userId));
+// Path style (Lecture 8): no "?" or "&" is needed, so nothing can be cut off by the shell.
+//   GET /api/goals/user/:userId
+//   GET /api/goals/user/:userId/keyword/:keyword
+//   GET /api/goals/user/:userId/status/:status
+//   GET /api/goals/user/:userId/keyword/:keyword/status/:status
+api.get('/user/:userId', (req, res) =>
+  sendGoals(req, res, req.params.userId, req.query.keyword, req.query.status));
+api.get('/user/:userId/keyword/:keyword', (req, res) =>
+  sendGoals(req, res, req.params.userId, req.params.keyword, undefined));
+api.get('/user/:userId/status/:status', (req, res) =>
+  sendGoals(req, res, req.params.userId, undefined, req.params.status));
+api.get('/user/:userId/keyword/:keyword/status/:status', (req, res) =>
+  sendGoals(req, res, req.params.userId, req.params.keyword, req.params.status));
 
-// GET /api/goals?userId=...
-api.get('/', (req, res) => sendGoals(req, res, req.query.userId));
+// Query style: GET /api/goals?userId=...&keyword=...&status=...   (put the address in quotes)
+api.get('/', (req, res) => sendGoals(req, res, req.query.userId, req.query.keyword, req.query.status));
+
+// GET /api/goals/:id?userId=...   one goal of this user (404 if it is not found or belongs to someone else)
+api.get('/:id', async (req, res) => {
+  try {
+    const filter = apiFilter(req, res, req.query.userId);
+    if (!filter) return;
+    const found = await goal.findGoal(req.db, filter);
+    if (!found) return res.status(404).json({ error: 'Goal not found' });
+    res.status(200).json({ data: goal.withProgress(found) });
+  } catch (err) {
+    res.status(500).json({ error: 'Unable to load goal' });
+  }
+});
 
 // POST /api/goals    body: { "userId": "...", "name": "Japan Trip", "targetAmount": 1000, "deadline": "2027-03-31" }
 api.post('/', async (req, res) => {
