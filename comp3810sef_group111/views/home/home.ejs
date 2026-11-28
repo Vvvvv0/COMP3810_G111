@@ -1,0 +1,50 @@
+<%- include('index') %>
+
+<%
+  var loggedIn = !!(locals.user && locals.user.userId);
+%>
+
+<main class="home">
+  <section class="hero">
+    <h1>Take control of your money</h1>
+    <p>Personal Expense and Budget Tracker helps you record what you earn and spend,
+       plan each month's budget and reach your saving goals, all in one place.</p>
+%>
+  </section>
+
+  <section>
+    <h2>What you can do</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>Track income and expenses</h3>
+        <p>Record every transaction with a category and a date, then search by keyword, type, category or date range to see where your money goes.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Plan monthly budgets</h3>
+        <p>Set a spending limit for a month or a category. The budget plan shows what is left after your budgets and warns you when they are more than your income.</p>
+      </div>
+      <div class="feature-card">
+        <h3>See it at a glance</h3>
+        <p>The budget plan shows your income, budgets and what is left for each month, and your net balance shows what you have across all months.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Reach your saving goals</h3>
+        <p>Create goals such as a trip or a new laptop and add savings from money you have. Savings are blocked when your net balance is zero or negative.</p>
+      </div>
+    </div>
+  </section>
+  
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Register and log in</strong> with your username and password.</li>
+      <li><strong>Add your income and expenses</strong> in Transactions.</li>
+      <li><strong>Set your budgets</strong> for the month, then check the budget plan for any warning.</li>
+      <li><strong>Create your goals</strong> and add savings from your net balance.</li>
+    </ol>
+  </section>
+
+</main>
+</body>
+</html>
+

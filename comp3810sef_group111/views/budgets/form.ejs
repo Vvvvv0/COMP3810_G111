@@ -1,0 +1,53 @@
+<%- include('../home/index') %>
+<div class="form-container">
+  <h2><%= editing ? 'Edit Budget' : 'Add Budget' %></h2>
+
+  <% if (errors) { %>
+  <div class="error"><%= errors %></div>
+  <% } %>
+
+  <form
+    method="POST"
+    action="<%= editing ? `/budgets/${values._id}/update` : '/budgets' %>"
+  >
+    <div class="form-group">
+      <label for="month">Month</label>
+      <input type="month" id="month" name="month" value="<%= values.month %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category</label>
+ 
+      <select id="category" name="category">
+        <option value="" <%= !values.category ? 'selected' : '' %>>Overall</option>
+        <option value="food" <%= values.category === 'food' ? 'selected' : '' %>>food</     option>
+        <option value="transportation" <%= values.category === 'transportation' ? 'selected' : '' %>>transportation</option>
+        <option value="shopping" <%= values.category === 'shopping' ? 'selected' : '' %>>Shopping</option>
+        <option value="entertainment" <%= values.category === 'entertainment' ? 'selected' : '' %>>entertainment</option>
+        <option value="housing" <%= values.category === 'housing' ? 'selected' : '' %>>housing</option>
+        <option value="health" <%= values.category === 'health' ? 'selected' : '' %>>health</option>
+        <option value="education" <%= values.category === 'education' ? 'selected' : '' %>>education</option>
+        <option value="other" <%= values.category === 'other' ? 'selected' : '' %>>other</option>
+      </select>
+      <p class="hint">Use the same category name as in your transactions.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="amount">Budget amount</label>
+      <input
+        type="number"
+        id="amount"
+        name="amount"
+        step="0.01"
+        min="0.01"
+        value="<%= values.amount %>"
+        required
+      >
+    </div>
+
+    <div class="bg-actions">
+      <button type="submit"><%= editing ? 'Save Changes' : 'Create Budget' %></button>
+      <a href="/budgets">Cancel</a>
+    </div>
+  </form>
+</div>

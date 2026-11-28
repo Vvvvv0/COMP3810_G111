@@ -1,0 +1,64 @@
+<%- include('../home/index') %>
+<main>
+  <div class="bg-bar">
+    <h2>Budget Dashboard: <%= month %></h2>
+    <a href="/budgets?month=<%= month %>">Back to budgets</a>
+  </div>
+
+  <% var mp = monthlyPlan; var fmt = function (n) { return Number(n).toFixed(2); }; %>
+  <% if (locals.isPastMonth) { %>
+  <div class="bg-item">
+    <div class="bg-item-head"><strong>Budget plan</strong></div>
+    <p>Income: <%= fmt(mp.income) %> &middot; Expenses: <%= fmt(mp.expense) %> &middot; Net: <%= fmt(mp.income - mp.expense) %></p>
+    <p>Budgets: <%= fmt(mp.plannedSpend) %> &middot; Spent: <%= fmt(mp.expense) %> &middot; Remaining: <%= fmt(mp.plannedSpend - mp.expense) %></p>
+  </div>
+  <% } else { %>
+  <div class="bg-item">
+    <div class="bg-item-head">
+      <strong>Budget plan</strong>
+      <% if (mp.overCommitted) { %><span class="badge over">Over-committed</span><% } else { %><span class="badge ok">Planned</span><% } %>
+    </div>
+    <p>
+      Income: <%= fmt(mp.income) %> &middot; Expenses so far: <%= fmt(mp.expense) %> &middot;
+      Planned spending (budgets): <%= fmt(mp.plannedSpend) %>
+    </p>
+    <p>
+      <% if (mp.availableToSpend < 0) { %>
+        <strong class="neg">Over by <%= fmt(-mp.availableToSpend) %></strong>
+      <% } else { %>
+        <strong>Available to spend now: <%= fmt(mp.availableToSpend) %></strong>
+      <% } %>
+    </p>
+    <p>
+      <% if (mp.overCommitted) { %>
+        Budgets and goal savings add up to <%= fmt(-mp.unplanned) %> more than this month's income.
+      <% } else { %>
+        Unplanned money this month: <%= fmt(mp.unplanned) %>
+      <% } %>
+    </p>
+    <p class="hint">Available to spend is your all-time net: income minus expenses minus goal savings.</p>
+  </div>
+  <% } %>
+
+  <% if (budgets.length === 0) { %>
+  <p class="hint">No budgets for this month yet.</p>
+  <% } %>
+
+  <% budgets.forEach(function (bg) {
+       var pct = Number(bg.usagePct) || 0;
+       var state = pct >= 100 ? 'over' : (pct >= 80 ? 'near' : 'ok');
+       var label = pct >= 100 ? 'Over budget' : (pct >= 80 ? 'Near limit' : 'On track');
+  %>
+  <div class="bg-item">
+    <div class="bg-item-head">
+      <strong><%= bg.category || 'Overall' %></strong>
+      <span class="badge <%= state %>"><%= label %></span>
+    </div>
+    <div class="bar"><div class="bar-fill <%= state %>" style="width: <%= Math.min(pct, 100) %>%"></div></div>
+    <p>
+      Budget: <%= bg.amount %> &middot; Spent: <%= bg.spentAmount %> &middot;
+      Remaining: <%= bg.remaining %> &middot; Usage: <%= pct %>%
+    </p>
+  </div>
+  <% }); %>
+</main>
