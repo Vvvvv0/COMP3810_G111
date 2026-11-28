@@ -1,188 +1,193 @@
 <%- include('../home/index') %>
-<%
-  // ---- Progress for each goal (the route already adds these; the fallback is for safety) ----
-  var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
-  var now = new Date();
-  var today = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
 
-  var rows = (locals.goals || []).map(function (g) {
-    if (g.statusLabel) { return g; }
-    var target = Number(g.targetAmount) || 0;
-    var saved = Number(g.savedAmount) || 0;
-    var label = "In progress";
-    if (target > 0 && saved >= target) { label = "Completed"; }
-    else if (g.deadline && g.deadline < today) { label = "Overdue"; }
-    return Object.assign({}, g, {
-      targetAmount: target,
-      savedAmount: saved,
-      percent: target > 0 ? Math.min(100, Math.floor(saved / target * 100)) : 0,
-      remaining: Math.max(0, Math.round((target - saved) * 100) / 100),
-      statusLabel: label
-    });
-  });
 
-  // Progress groups used by the filter chips
-  var groupOf = function (p) {
-    if (p >= 100) { return "done"; }
-    if (p >= 50) { return "high"; }
-    if (p > 0) { return "low"; }
-    return "none";
-  };
-  var groups = [
-    { key: "none", label: "Not started" },
-    { key: "low",  label: "Under 50%" },
-    { key: "high", label: "50% to 99%" },
-    { key: "done", label: "Completed" }
-  ];
-
-  // ---- Totals for the summary cards ----
-  var completed = 0;
-  rows.forEach(function (r) {
-    if (r.statusLabel === "Completed") { completed++; }
-  });
-  // Net (all time) and still to save, from the route. Fallback is for safety.
-  var summary = locals.summary || { net: 0, stillToSave: 0 };
-
-  var message = locals.message || "";
-  var errors = locals.errors || [];
-%>
 
 <main class="goals-page">
+
   <h2>My Saving Goals</h2>
 
+
+
   <% if (message) { %>
+
     <div class="success"><%= message %></div>
+
   <% } %>
+
   <% if (errors.length > 0) { %>
+
     <div class="error">
+
       <ul>
-      <% errors.forEach(function (m) { %>
-        <li><%= m %></li>
-      <% }); %>
+
+        <% errors.forEach(function (m) { %>
+
+          <li><%= m %></li>
+
+        <% }); %>
+
       </ul>
+
     </div>
+
   <% } %>
+
+
 
   <div class="goal-summary">
-    <div><strong><%= rows.length %></strong><span>Goals</span></div>
-    <div><strong><%= completed %></strong><span>Completed</span></div>
+
+    <div><strong><%= totalCount %></strong><span>Goals</span></div>
+
     <div class="<%= summary.net < 0 ? 'neg' : '' %>"><strong><%= summary.net.toFixed(2) %></strong><span>Net</span></div>
+
     <div><strong><%= summary.stillToSave.toFixed(2) %></strong><span>Still to save (target &minus; saved)</span></div>
+
   </div>
 
-  <% if (rows.length > 0) { %>
-  <div class="search-box">
-    <input type="text" id="kw" placeholder="Search by goal name, e.g. trip" maxlength="50" autocomplete="off">
-    <div class="chips">
-      <label class="chip"><input type="radio" name="bucket" value="all" checked> All</label>
-      <% groups.forEach(function (gr) { %>
-        <label class="chip"><input type="radio" name="bucket" value="<%= gr.key %>"> <%= gr.label %></label>
+
+
+  <% if (totalCount > 0) { %>
+
+  <form method="GET" action="/goals" class="search-box">
+
+    <input type="text" name="keyword" value="<%= filters.keyword %>" placeholder="Search by goal name, e.g. trip" maxlength="50" autocomplete="off">
+
+    <br><br>
+
+    <select name="status">
+
+      <option value="" <%= filters.status === '' ? 'selected' : '' %>>All statuses</option>
+
+      <% ['In progress', 'Completed', 'Overdue'].forEach(function (s) { %>
+
+        <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+
       <% }); %>
-    </div>
-    <div class="search-foot">
-      <span>Showing <strong id="shown"><%= rows.length %></strong> of <%= rows.length %> goals</span>
-      <button type="button" id="clear">Clear search</button>
-    </div>
-  </div>
+
+    </select>
+
+    <button type="submit">Search</button>
+
+    <a href="/goals">Clear</a>
+
+  </form>
+
   <% } %>
+
+
 
   <p><a class="btn" href="/goals/new">+ Add goal</a></p>
 
-  <% if (rows.length === 0) { %>
+
+
+  <% if (totalCount === 0) { %>
+
     <p class="hint">No saving goals yet. Click "+ Add goal" to create your first one.</p>
+
+  <% } else if (goals.length === 0) { %>
+
+    <p class="hint">No goals match your search. <a href="/goals">Show all goals</a></p>
+
   <% } else { %>
+
   <div class="table-wrap">
+
     <table>
+
       <thead>
+
         <tr>
+
           <th>Goal</th>
+
           <th>Progress</th>
+
           <th>Saved</th>
+
           <th>Target</th>
+
           <th>Remaining</th>
+
           <th>Deadline</th>
+
           <th>Status</th>
+
           <th>Actions</th>
+
         </tr>
+
       </thead>
-      <tbody id="grid">
-        <% rows.forEach(function (g) {
-             var cls = g.statusLabel.toLowerCase().replace(" ", "-");
-             var grp = groupOf(g.percent); %>
-        <tr class="goal-row" data-name="<%= g.name.toLowerCase() %>" data-bucket="<%= grp %>">
+
+      <tbody>
+
+        <% goals.forEach(function (g) {
+
+             var cls = g.statusLabel.toLowerCase().replace(" ", "-"); %>
+
+        <tr>
+
           <td><span class="goal-name"><%= g.name %></span></td>
+
           <td>
+
             <div class="bar"><div class="bar-fill <%= cls %>" style="width: <%= g.percent %>%"></div></div>
+
             <span class="pct"><%= g.percent %>%</span>
+
           </td>
+
           <td><%= g.savedAmount.toFixed(2) %></td>
+
           <td><%= g.targetAmount.toFixed(2) %></td>
+
           <td><%= g.remaining.toFixed(2) %></td>
+
           <td><%= g.deadline ? g.deadline : "None" %></td>
+
           <td><span class="badge <%= cls %>"><%= g.statusLabel %></span></td>
+
           <td class="actions">
+
             <% if (g.statusLabel !== "Completed" && summary.net > 0) { %>
+
             <form class="inline-form" action="/goals/<%= g._id %>/save" method="POST">
+
               <input type="number" name="amount" min="0.01" max="<%= summary.net.toFixed(2) %>" step="0.01" placeholder="Saving" required>
+
               <button type="submit">Add</button>
+
             </form>
+
             <% } else if (g.statusLabel !== "Completed") { %>
+
             <span class="hint">Blocked: no net balance</span>
+
             <% } %>
+
             <a href="/goals/<%= g._id %>/edit">Edit</a>
-            <form class="inline-form" action="/goals/<%= g._id %>/delete" method="POST" onsubmit="return confirm('Delete this goal?');">
+
+            <form class="inline-form" action="/goals/<%= g._id %>/delete" method="POST">
+
               <button type="submit" class="danger">Delete</button>
+
             </form>
+
           </td>
+
         </tr>
+
         <% }); %>
+
       </tbody>
+
     </table>
+
   </div>
-  <p class="no-match" id="nomatch">No goals match your search. <a href="#" id="showall">Show all goals</a></p>
+
   <% } %>
+
 </main>
 
-<script>
-  // Live search on this page: no reload, no cookie, no extra request
-  (function () {
-    var input = document.getElementById("kw");
-    var rowsEl = document.querySelectorAll(".goal-row");
-    if (!input || rowsEl.length === 0) { return; }
-    var radios = document.querySelectorAll('input[name="bucket"]');
-    var shown = document.getElementById("shown");
-    var none = document.getElementById("nomatch");
+</BODY>
 
-    function selectedBucket() {
-      for (var i = 0; i < radios.length; i++) { if (radios[i].checked) { return radios[i].value; } }
-      return "all";
-    }
-    function apply() {
-      var word = input.value.trim().toLowerCase();
-      var bucket = selectedBucket();
-      var n = 0;
-      for (var i = 0; i < rowsEl.length; i++) {
-        var r = rowsEl[i];
-        var byName = word === "" || r.getAttribute("data-name").indexOf(word) !== -1;
-        var byBucket = bucket === "all" || r.getAttribute("data-bucket") === bucket;
-        var show = byName && byBucket;
-        r.style.display = show ? "" : "none";
-        if (show) { n++; }
-      }
-      shown.textContent = n;
-      none.style.display = n === 0 ? "block" : "none";
-    }
-    function reset() {
-      input.value = "";
-      radios[0].checked = true;
-      apply();
-    }
-    input.addEventListener("input", apply);
-    for (var i = 0; i < radios.length; i++) { radios[i].addEventListener("change", apply); }
-    document.getElementById("clear").addEventListener("click", reset);
-    document.getElementById("showall").addEventListener("click", function (e) { e.preventDefault(); reset(); });
-    apply();
-  })();
-</script>
-</body>
-</html>
+</HTML>

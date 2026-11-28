@@ -1,22 +1,20 @@
 // routes/transactions.js
 const express = require('express');
 const tx = require('../models/transaction');
-
 const pages = express.Router();
 const api = express.Router();
-
 const uid = (req) => String(req.session.userId || '');
 
 pages.get('/', async (req, res, next) => {
   try {
     const userId = uid(req);
     const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(req.query.limit, 10) || DEFAULT_LIMIT));
-    const filter = tx.buildFilter({ ...req.query, userId });
-    const count = await tx.countTransactions(req.db, filter);
+    const matched = tx.newestFirst(tx.matching(await tx.loadTransactions(req.db, userId), req.query));
+    const count = matched.length;
     const totalPages = Math.max(1, Math.ceil(count / limit));
     const page = Math.min(totalPages, Math.max(1, parseInt(req.query.page, 10) || 1));
-    const transactions = await tx.findTransactionPage(req.db, filter, (page - 1) * limit, limit);
-    const { income, expense } = await tx.sumByType(req.db, userId, req.query);
+    const transactions = matched.slice((page - 1) * limit, page * limit);
+    const { income, expense } = tx.summarize(matched);
     res.render('transactions/list', {
       title: 'My Transactions',
       user: req.session,
@@ -60,6 +58,7 @@ pages.post('/', async (req, res, next) => {
         errors: [err]
       });
     }
+
     await tx.insertTransaction(req.db, {
       userId: uid(req),
       type: values.type,
@@ -135,13 +134,11 @@ pages.post('/:id/delete', async (req, res, next) => {
 pages.get('/:id', async (req, res, next) => {
   try {
     const t = await tx.findTransactionById(req.db, req.params.id);
-
     if (!t || String(t.userId) !== uid(req)) {
       return res.status(404).send('404 Not Found');
     }
 
     const amt = Number(t.amount) || 0;
-
     res.render('transactions/list', {
       title: 'Transaction Details',
       user: req.session,
@@ -205,10 +202,10 @@ api.get('/', async (req, res) => {
       if (!Number.isInteger(limit) || limit < 1) return res.status(400).json({ error: 'limit must be a whole number, 1 or more' });
     }
 
-    const filter = tx.buildFilter({ ...q, keyword: q.keyword ? escapeRegex(q.keyword) : undefined });
-    const total = await tx.countTransactions(req.db, filter);
-    const data = await tx.findTransactionPage(req.db, filter, 0, limit || total);
-    res.status(200).json({ count: data.length, total, limit, data });
+    // Load the user's transactions, filter and sort them in JavaScript
+    const matched = tx.newestFirst(tx.matching(await tx.loadTransactions(req.db, q.userId), q));
+    const data = limit ? matched.slice(0, limit) : matched;
+    res.status(200).json({ count: data.length, total: matched.length, limit, data });
   } catch (err) {
     res.status(500).json({ error: 'Unable to load transactions' });
   }
@@ -220,7 +217,6 @@ api.get('/:id', async (req, res) => {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ error: 'userId is required' });
     if (!isId(req.params.id)) return res.status(400).json({ error: 'Invalid transaction id' });
-
     const t = await tx.findTransactionById(req.db, req.params.id);
     if (!t || String(t.userId) !== String(userId)) return res.status(404).json({ error: 'Transaction not found' });
     res.status(200).json({ data: t });
@@ -297,4 +293,3 @@ api.delete('/:id', async (req, res) => {
 });
 
 module.exports = { pages, api };
-

@@ -1,76 +1,137 @@
 <%- include('../home/index') %>
+
+
+
 <main>
+
   <div class="bg-bar">
+
     <h2>Budgets</h2>
+
     <a class="push" href="/budgets/dashboard?month=<%= month %>">View dashboard</a>
+
   </div>
+
+
 
   <form method="GET" action="/budgets" class="bg-filter">
+
     <label for="month">Month</label>
+
     <input type="month" id="month" name="month" value="<%= month %>">
+
     <button type="submit">Filter</button>
+
   </form>
 
+
+
   <% if (error) { %>
+
   <div class="error"><%= error %></div>
+
   <% } %>
 
+
+
   <div class="hint">
+
     <p><strong>How to set budgets:</strong> first add an overall budget for the month. It is the total you plan to spend that month,
+
        so use your expected expenses rather than your income. Then add category budgets. Their total cannot be more than the overall budget.</p>
+
   </div>
-  
+
+
+
   <a class="btn" href="/budgets/new">+ Add Budget</a>
-  
+
+
+
   <br><br>
 
+
+
   <table class="bg-table">
+
     <thead>
+
       <tr>
+
         <th>Category</th>
+
         <th>Budget</th>
+
         <th>Spent</th>
+
         <th>Remaining</th>
+
         <th>Usage</th>
+
         <th>Actions</th>
+
       </tr>
+
     </thead>
+
     <tbody>
+
       <% if (budgets.length === 0) { %>
+
       <tr><td colspan="6" class="hint">No budgets for this month yet. Click "Add Budget" to create one.</td></tr>
+
       <% } %>
+
       <% budgets.forEach(function (bg) {
+
            var pct = Number(bg.usagePct) || 0;
+
            var state = pct >= 100 ? 'over' : (pct >= 80 ? 'near' : 'ok');
+
            var label = pct >= 100 ? 'Over budget' : (pct >= 80 ? 'Near limit' : 'On track');
+
       %>
+
       <tr>
+
         <td><%= bg.category || 'Overall' %></td>
+
         <td><%= bg.amount %></td>
+
         <td><%= bg.spentAmount %></td>
+
         <td><%= bg.remaining %></td>
+
         <td>
+
           <div class="bar"><div class="bar-fill <%= state %>" style="width: <%= Math.min(pct, 100) %>%"></div></div>
+
           <span class="badge <%= state %>"><%= pct %>% <%= label %></span>
+
         </td>
+
         <td>
+
           <a href="/budgets/<%= bg._id %>/edit">Edit</a>
-          <form method="POST" action="/budgets/<%= bg._id %>/delete" class="inline-form"
-                data-confirm="Delete this budget?">
+
+          <form method="POST" action="/budgets/<%= bg._id %>/delete" class="inline-form">
+
             <button type="submit" class="danger">Delete</button>
+
           </form>
+
         </td>
+
       </tr>
+
       <% }); %>
+
     </tbody>
+
   </table>
+
 </main>
-<script>
-  document.querySelectorAll('form[data-confirm]').forEach(function (f) {
-    f.addEventListener('submit', function (e) {
-      if (!window.confirm(f.dataset.confirm)) e.preventDefault();
-    });
-  });
 
-</script>
+</BODY>
 
+</HTML>
