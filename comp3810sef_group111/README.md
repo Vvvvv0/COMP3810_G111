@@ -86,15 +86,14 @@ The entry point. It:
 - adds `req.db` so every route can reach the database;
 - mounts the public pages, the REST APIs under `/api`, and the CRUD pages under `/profile`, `/transactions`, `/budgets` and `/goals` (these require login);
 - provides a 404 page and a general error handler.
-
-It also defines the shared password rules and email check, which are used by the register and profile routes.
+- defines the shared password rules and email check, which are used by the register and profile routes.
 
 ### `package.json`
 Lists the project name, the Node.js version requirement (`>= 18.0.0`), and the dependencies:
 
-- `express`: web server and routing
-- `ejs`: HTML templates
-- `cookie-session`: login sessions
+- `express` (*): web server and routing
+- `ejs` (*): HTML templates
+- `cookie-session` (^2.1.0): login sessions
 - `mongodb` (6.9.0): MongoDB driver
 
 The start script is `npm start`, which runs `node server.js`.
